@@ -22,7 +22,7 @@
                 android:layout_marginLeft="32dp"
                 android:textSize="16sp"
                 android:textColor="#e6000000"
-                android:text="Allow permission"/>
+                android:text="@string/allow_permission"/>
 
             <FrameLayout
                 android:layout_width="110dp"

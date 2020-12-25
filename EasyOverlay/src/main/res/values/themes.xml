@@ -31,9 +31,10 @@
     <dimen name="dp_30">30dp</dimen>
     <color name="perm_overlay_reminder_close">#f1f1f1</color>
     <color name="perm_overlay_reminder_open">#55bce1</color>
-    <string name="overlay_reminder_text">Click this button to ensure the function of Calling assistant int the floating window</string>
     <color name="primary_color">#0080ff</color>
-    <string name="app_name">EasyOverlay</string>
+    <string name="app_name" translatable="false">EasyOverlay</string>
+    <string name="overlay_reminder_text">Click this button to ensure the function of Quick preview and reply int the floating window</string>
+    <string name="allow_permission">Allow permission</string>
     <!-- Start in background -->
     <string name="start_in_background">Start in background</string>
     <string name="display_popup_window">Display pop-up window</string>

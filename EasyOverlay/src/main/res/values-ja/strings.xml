@@ -1,0 +1,6 @@
+<resources>
+    <string name="overlay_reminder_text">このボタンをクリックして、クイックプレビューとフローティングウィンドウへの返信の機能を確認します</string>
+    <string name="start_in_background">バックグラウンドで開始</string>
+    <string name="display_popup_window">ポップアップウィンドウを表示</string>
+    <string name="allow_permission">権限を許可する</string>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="overlay_reminder_text">单击此按钮可确保浮动窗口中的快速预览及回复功能正常使用</string>
+    <string name="start_in_background">后台弹出界面</string>
+    <string name="display_popup_window">显示悬浮窗</string>
+    <string name="allow_permission">允许权限</string>
+</resources>

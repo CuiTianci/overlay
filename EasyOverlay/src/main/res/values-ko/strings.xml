@@ -1,0 +1,6 @@
+<resources>
+    <string name="overlay_reminder_text">빠른 미리보기 기능을 확인하고 부동 창에서 응답하려면이 단추를 클릭하십시오.</string>
+    <string name="start_in_background">백그라운드에서 시작</string>
+    <string name="display_popup_window">팝업 창 표시</string>
+    <string name="allow_permission">권한 허용</string>
+</resources>
