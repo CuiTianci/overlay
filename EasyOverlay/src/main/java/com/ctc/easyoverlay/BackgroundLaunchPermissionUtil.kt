@@ -31,7 +31,7 @@ class BackgroundLaunchPermissionUtil {
          * 判断是否可以后台启动Activity。
          */
         fun isPermissionGranted(context: Context): Boolean =
-            isCommonDevicePermissionGranted(context) || isMiPermissionGranted(context)
+            isCommonDevicePermissionGranted(context) || isMiPermissionGranted(context) >= 2
 
         /**
          * 打开系统授权页。
@@ -74,9 +74,9 @@ class BackgroundLaunchPermissionUtil {
          * 小米手机权限单独判断。
          * Start in background\Display pop-up window
          */
-        private fun isMiPermissionGranted(context: Context): Boolean {
-            if (!isMi()) return false
-            return try {
+        private fun isMiPermissionGranted(context: Context): Int {
+            if (!isMi()) return -1
+            val miResult = try {
                 val ops: AppOpsManager =
                     context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
                 val op = 10021
@@ -96,6 +96,12 @@ class BackgroundLaunchPermissionUtil {
                 e.printStackTrace()
                 false
             }
+            val commonResultType =
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Settings.canDrawOverlays(
+                        context
+                    )
+                ) 2 else 1
+            return if (miResult) commonResultType else 0
         }
 
         /**
@@ -146,19 +152,33 @@ class BackgroundLaunchPermissionUtil {
             if (BuildConfig.DEBUG && !(activity != null || fragment != null)) {
                 error("Activity和Fragment不得同时为空")
             }
-            return try {
-                val intent = Intent()
-                intent.action = "miui.intent.action.APP_PERM_EDITOR"
-                intent.addCategory(Intent.CATEGORY_DEFAULT)
-                Uri.parse("package:${activity?.packageName ?: fragment!!.context!!.packageName}")
-                getInvisibleFragment(activity, fragment).openBackgroundLaunchPermissionActivity(
-                    intent,
-                    autoBack,
-                    permissionGrantResultListener
-                )
-                OpenSettingState.STATE_MI_START_IN_BACKGROUND
-            } catch (e: java.lang.Exception) {
-                OpenSettingState.STATE_FAILED
+            val context = activity ?: fragment!!.context!!
+            return when (isMiPermissionGranted(context)) {
+                0 -> {
+                    try {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:${activity?.packageName ?: fragment!!.context!!.packageName}")
+                        )
+                        getInvisibleFragment(
+                            activity,
+                            fragment
+                        ).openBackgroundLaunchPermissionActivity(
+                            intent,
+                            autoBack,
+                            permissionGrantResultListener
+                        )
+                        OpenSettingState.STATE_MI_START_IN_BACKGROUND
+                    } catch (e: java.lang.Exception) {
+                        OpenSettingState.STATE_FAILED
+                    }
+                }
+                1 -> {
+                    openCommonSettings(activity, fragment, autoBack, permissionGrantResultListener)
+                }
+                else -> {
+                    OpenSettingState.STATE_FAILED
+                }
             }
         }
 

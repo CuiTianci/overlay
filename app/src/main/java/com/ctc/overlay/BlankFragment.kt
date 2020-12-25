@@ -8,9 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.ctc.easyoverlay.BackgroundLaunchPermissionUtil
-import com.ctc.easyoverlay.OverlayDirectionActivity
-import com.ctc.easyoverlay.PermissionResultListener
+import com.ctc.easyoverlay.*
 
 
 class BlankFragment : Fragment() {
@@ -21,7 +19,7 @@ class BlankFragment : Fragment() {
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_blank, container, false)
         rootView.findViewById<TextView>(R.id.tv_fragment).setOnClickListener {
-            BackgroundLaunchPermissionUtil.startBackgroundLaunchPermissionGrantActivity(
+            when (BackgroundLaunchPermissionUtil.startBackgroundLaunchPermissionGrantActivity(
                 fragment = this,
                 autoBack = true,
                 permissionGrantResultListener = object : PermissionResultListener {
@@ -30,8 +28,20 @@ class BlankFragment : Fragment() {
                     }
 
                 }
-            )
-            startActivity(Intent(context, OverlayDirectionActivity::class.java))
+            )) {
+                OpenSettingState.STATE_COMMON_OVERLAY -> startActivity(
+                    Intent(
+                        context,
+                        OverlayDirectionActivity::class.java
+                    )
+                )
+                OpenSettingState.STATE_MI_START_IN_BACKGROUND -> startActivity(
+                    Intent(
+                        context,
+                        StartInBackgroundActivity::class.java
+                    )
+                )
+            }
         }
         return rootView
     }
