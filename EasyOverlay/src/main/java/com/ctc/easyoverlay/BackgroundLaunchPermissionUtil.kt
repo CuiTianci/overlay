@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.*
@@ -234,14 +233,12 @@ class InvisibleFragment : Fragment() {
             permissionCheckJob = CoroutineScope(Dispatchers.IO).launch {
                 while (true) {
                     delay(500)
-                    Log.e("cui", "dododo")
                     if (BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)) {
                         val backIntent = Intent(context, requireActivity().javaClass)
                         backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         backIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                         startActivity(backIntent)
                         cancel("")
-                        Log.e("cui", "启动")
                     }
                 }
             }

@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -19,10 +18,7 @@ public class OverlayDirectionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_overlay_direction);
-
         initViews();
         startAnimation();
     }
@@ -81,9 +77,9 @@ public class OverlayDirectionActivity extends AppCompatActivity {
         mFabSwitchToggle.setX(mOriginalTogglePosition + offset);
 
         if (offset * 1.5 < mAnimBounds)
-            mFabSwitchToggle.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.perm_overlay_reminder_close)));
+            mFabSwitchToggle.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.perm_overlay_reminder_close)));
         else
-            mFabSwitchToggle.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.perm_overlay_reminder_open)));
+            mFabSwitchToggle.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.perm_overlay_reminder_open)));
     }
 
     float mOriginalFingerPosition = -1;

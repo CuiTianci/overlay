@@ -78,12 +78,7 @@ public class StartInBackgroundActivity extends AppCompatActivity {
         mTranslateAnimation.setDuration(500);
         mTranslateAnimation.setInterpolator(new LinearInterpolator());
         mOverlayAnim.startAnimation(mTranslateAnimation);
-        findViewById(R.id.perm_guide_container).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        findViewById(R.id.perm_guide_container).setOnClickListener(v -> finish());
         mMainHandler = new MainHandler(this);
 
         if (!BackgroundLaunchPermissionUtil.Companion.isPermissionGranted(this) &&
