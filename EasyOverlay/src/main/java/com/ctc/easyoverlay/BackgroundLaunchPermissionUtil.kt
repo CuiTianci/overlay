@@ -45,7 +45,7 @@ class BackgroundLaunchPermissionUtil {
             activity: FragmentActivity? = null,
             fragment: Fragment? = null,
             autoBack: Boolean = false,
-            permissionGrantResultListener: (result: Boolean) -> Unit,
+            permissionGrantResultListener: PermissionResultListener,
         ): OpenSettingState {
             if (BuildConfig.DEBUG && !(activity != null || fragment != null)) {
                 error("Activity和Fragment不得同时为空")
@@ -109,7 +109,7 @@ class BackgroundLaunchPermissionUtil {
             activity: FragmentActivity? = null,
             fragment: Fragment? = null,
             autoBack: Boolean = false,
-            permissionGrantResultListener: (result: Boolean) -> Unit,
+            permissionGrantResultListener: PermissionResultListener,
         ): OpenSettingState {
             if (BuildConfig.DEBUG && !(activity != null || fragment != null)) {
                 error("Activity和Fragment不得同时为空")
@@ -141,7 +141,7 @@ class BackgroundLaunchPermissionUtil {
             activity: FragmentActivity? = null,
             fragment: Fragment? = null,
             autoBack: Boolean = false,
-            permissionGrantResultListener: (result: Boolean) -> Unit,
+            permissionGrantResultListener: PermissionResultListener,
         ): OpenSettingState {
             if (BuildConfig.DEBUG && !(activity != null || fragment != null)) {
                 error("Activity和Fragment不得同时为空")
@@ -212,7 +212,7 @@ enum class OpenSettingState {
  */
 class InvisibleFragment : Fragment() {
 
-    private lateinit var permissionGrantResultListener: (result: Boolean) -> Unit
+    private lateinit var permissionGrantResultListener: PermissionResultListener
     private lateinit var permissionCheckJob: Job
 
     /**
@@ -224,7 +224,7 @@ class InvisibleFragment : Fragment() {
     fun openBackgroundLaunchPermissionActivity(
         intent: Intent,
         autoBack: Boolean = false,
-        permissionGrantResultListener: (result: Boolean) -> Unit,
+        permissionGrantResultListener: PermissionResultListener,
     ) {
         this.permissionGrantResultListener = permissionGrantResultListener
         startActivityForResult(intent, REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION)
@@ -254,7 +254,7 @@ class InvisibleFragment : Fragment() {
             permissionCheckJob.cancel("")
         }
         when (requestCode) {
-            REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION -> permissionGrantResultListener(
+            REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION -> permissionGrantResultListener.onPermissionResult(
                 BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)
             )
         }
@@ -264,4 +264,8 @@ class InvisibleFragment : Fragment() {
         const val REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION = 1
         const val INVISIBLE_FRAGMENT_TAG = "com.background.launch.invisible.fragment"
     }
+}
+
+interface PermissionResultListener {
+    fun onPermissionResult(result: Boolean)
 }

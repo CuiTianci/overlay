@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.ctc.easyoverlay.BackgroundLaunchPermissionUtil
 import com.ctc.easyoverlay.OverlayDirectionActivity
+import com.ctc.easyoverlay.PermissionResultListener
 
 
 class BlankFragment : Fragment() {
@@ -22,10 +23,14 @@ class BlankFragment : Fragment() {
         rootView.findViewById<TextView>(R.id.tv_fragment).setOnClickListener {
             BackgroundLaunchPermissionUtil.startBackgroundLaunchPermissionGrantActivity(
                 fragment = this,
-                autoBack = true
-            ) {
-                Log.e("cui", "result$it")
-            }
+                autoBack = true,
+                permissionGrantResultListener = object : PermissionResultListener {
+                    override fun onPermissionResult(result: Boolean) {
+                        Log.e("cui", "result:$result")
+                    }
+
+                }
+            )
             startActivity(Intent(context, OverlayDirectionActivity::class.java))
         }
         return rootView
