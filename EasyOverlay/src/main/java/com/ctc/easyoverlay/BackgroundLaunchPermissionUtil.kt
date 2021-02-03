@@ -73,6 +73,7 @@ class BackgroundLaunchPermissionUtil {
         /**
          * 小米手机权限单独判断。
          * Start in background\Display pop-up window
+         * @return -1：非小米设备；0：不具备startInBackground\Display pop-up window权限；1：具备startIn...,但不满足常规Android10.0设备SystemAlertWindow权限。2：具备后台启动界面能力。
          */
         private fun isMiPermissionGranted(context: Context): Int {
             if (!isMi()) return -1
@@ -274,9 +275,13 @@ class InvisibleFragment : Fragment() {
             permissionCheckJob.cancel("")
         }
         when (requestCode) {
-            REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION -> permissionGrantResultListener.onPermissionResult(
-                BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)
-            )
+            REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION -> {
+                if (this::permissionGrantResultListener.isInitialized) {
+                    permissionGrantResultListener.onPermissionResult(
+                        BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)
+                    )
+                }
+            }
         }
     }
 
