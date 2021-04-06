@@ -7,10 +7,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.*
 import java.lang.reflect.Method
+import kotlin.coroutines.CoroutineContext
 
 /**
  * 常规手机：
@@ -26,6 +28,8 @@ import java.lang.reflect.Method
 class BackgroundLaunchPermissionUtil {
 
     companion object {
+
+        const val TAG = "BackgroundLaunchPermissionUtil"
 
         /**
          * 判断是否可以后台启动Activity。
@@ -250,18 +254,27 @@ class InvisibleFragment : Fragment() {
         this.permissionGrantResultListener = permissionGrantResultListener
         startActivityForResult(intent, REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION)
         if (autoBack) {
-            //轮询判断是否授予权限，授予时自动返回当前Activity。
-            permissionCheckJob = CoroutineScope(Dispatchers.IO).launch {
-                while (true) {
-                    delay(500)
-                    if (BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)) {
-                        val backIntent = Intent(context, requireActivity().javaClass)
-                        backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        backIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        startActivity(backIntent)
-                        cancel("")
+            //后台错误日志，协程内部调用invokeSuspend方法时产生空指针异常。无解，故捕获该异常，对整体功能影响不大。
+            val exceptionHandler =
+                CoroutineExceptionHandler { _: CoroutineContext, _: Throwable ->
+                    Log.wtf(BackgroundLaunchPermissionUtil.TAG, "unknownExceptionInner")
+                }
+            try {
+                //轮询判断是否授予权限，授予时自动返回当前Activity。
+                permissionCheckJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
+                    while (true) {
+                        delay(500)
+                        if (BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)) {
+                            val backIntent = Intent(context, requireActivity().javaClass)
+                            backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            backIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            startActivity(backIntent)
+                            cancel("")
+                        }
                     }
                 }
+            } catch (_: Exception) {
+                Log.wtf(BackgroundLaunchPermissionUtil.TAG, "unknownExceptionOuter")
             }
         }
     }
