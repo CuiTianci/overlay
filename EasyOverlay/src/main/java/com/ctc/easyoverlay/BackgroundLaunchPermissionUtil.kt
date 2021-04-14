@@ -188,6 +188,35 @@ class BackgroundLaunchPermissionUtil {
         }
 
         /**
+         * 判断是否具备Overlay权限。
+         * @param atLeastVersion 如果系统版本号小于该版本，则默认为具备权限。
+         */
+        fun hasOverlayPermission(context: Context, atLeastVersion: Int): Boolean {
+            if (Build.VERSION.SDK_INT < atLeastVersion) {
+                return true
+            }
+            return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
+        }
+
+        /**
+         * 启动申请Overlay权限的弹窗。
+         * @param fragment 当前上下文。
+         * @param activity 当前上下文。
+         * @param permissionGrantResultListener 授权结果回调。
+         * @param autoBack 是否在用户开启权限后跳回应用。
+         * @return 尝试开启页面，结果。
+         */
+        fun startOverlayPermissionGrantActivity(
+            activity: FragmentActivity? = null,
+            fragment: Fragment? = null,
+            autoBack: Boolean = false,
+            permissionGrantResultListener: PermissionResultListener
+        ): OpenSettingState {
+            return openCommonSettings(activity, fragment, autoBack, permissionGrantResultListener)
+        }
+
+
+        /**
          * 判断是否为小米手机。
          */
         private fun isMi(): Boolean = Build.BRAND.equals("xiaomi", true)
