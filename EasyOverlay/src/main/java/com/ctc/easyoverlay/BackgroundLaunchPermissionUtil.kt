@@ -121,6 +121,7 @@ class BackgroundLaunchPermissionUtil {
             fragment: Fragment? = null,
             autoBack: Boolean = false,
             permissionGrantResultListener: PermissionResultListener,
+            forBackgroundLaunch: Boolean = true
         ): OpenSettingState {
             if (BuildConfig.DEBUG && !(activity != null || fragment != null)) {
                 error("Activity和Fragment不得同时为空")
@@ -133,7 +134,8 @@ class BackgroundLaunchPermissionUtil {
                 getInvisibleFragment(activity, fragment).openBackgroundLaunchPermissionActivity(
                     intent,
                     autoBack,
-                    permissionGrantResultListener
+                    permissionGrantResultListener,
+                    forBackgroundLaunch
                 )
                 OpenSettingState.STATE_COMMON_OVERLAY
             } catch (e: java.lang.Exception) {
@@ -189,14 +191,10 @@ class BackgroundLaunchPermissionUtil {
 
         /**
          * 判断是否具备Overlay权限。
-         * @param atLeastVersion 如果系统版本号小于该版本，则默认为具备权限。
          */
-        fun hasOverlayPermission(context: Context, atLeastVersion: Int): Boolean {
-            if (Build.VERSION.SDK_INT < atLeastVersion) {
-                return true
-            }
-            return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
-        }
+        fun hasOverlayPermission(context: Context): Boolean =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
+
 
         /**
          * 启动申请Overlay权限的弹窗。
@@ -212,7 +210,13 @@ class BackgroundLaunchPermissionUtil {
             autoBack: Boolean = false,
             permissionGrantResultListener: PermissionResultListener
         ): OpenSettingState {
-            return openCommonSettings(activity, fragment, autoBack, permissionGrantResultListener)
+            return openCommonSettings(
+                activity,
+                fragment,
+                autoBack,
+                permissionGrantResultListener,
+                false
+            )
         }
 
 
@@ -279,6 +283,7 @@ class InvisibleFragment : Fragment() {
         intent: Intent,
         autoBack: Boolean = false,
         permissionGrantResultListener: PermissionResultListener,
+        forBackgroundLaunch: Boolean = true
     ) {
         this.permissionGrantResultListener = permissionGrantResultListener
         startActivityForResult(intent, REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION)
@@ -293,7 +298,11 @@ class InvisibleFragment : Fragment() {
                 permissionCheckJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
                     while (true) {
                         delay(500)
-                        if (BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)) {
+                        val permissionGranted =
+                            if (forBackgroundLaunch) BackgroundLaunchPermissionUtil.isPermissionGranted(
+                                context!!
+                            ) else BackgroundLaunchPermissionUtil.hasOverlayPermission(context!!)
+                        if (permissionGranted) {
                             val backIntent = Intent(context, requireActivity().javaClass)
                             backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             backIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
