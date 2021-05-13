@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import java.lang.reflect.Method
 import kotlin.coroutines.CoroutineContext
@@ -195,7 +196,6 @@ class BackgroundLaunchPermissionUtil {
         fun hasOverlayPermission(context: Context): Boolean =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
 
-
         /**
          * 启动申请Overlay权限的弹窗。
          * @param fragment 当前上下文。
@@ -218,7 +218,6 @@ class BackgroundLaunchPermissionUtil {
                 false
             )
         }
-
 
         /**
          * 判断是否为小米手机。
@@ -295,8 +294,8 @@ class InvisibleFragment : Fragment() {
                 }
             try {
                 //轮询判断是否授予权限，授予时自动返回当前Activity。
-                permissionCheckJob = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
-                    while (true) {
+                permissionCheckJob = lifecycleScope.launch(Dispatchers.Default + exceptionHandler) {
+                    while (isActive) {
                         delay(500)
                         val permissionGranted =
                             if (forBackgroundLaunch) BackgroundLaunchPermissionUtil.isPermissionGranted(
@@ -307,7 +306,7 @@ class InvisibleFragment : Fragment() {
                             backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             backIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                             startActivity(backIntent)
-                            cancel("")
+                            cancel()
                         }
                     }
                 }
@@ -322,8 +321,8 @@ class InvisibleFragment : Fragment() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (this::permissionCheckJob.isInitialized && !permissionCheckJob.isCancelled) {
-            permissionCheckJob.cancel("")
+        if (this::permissionCheckJob.isInitialized && permissionCheckJob.isActive) {
+            permissionCheckJob.cancel()
         }
         when (requestCode) {
             REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION -> {
