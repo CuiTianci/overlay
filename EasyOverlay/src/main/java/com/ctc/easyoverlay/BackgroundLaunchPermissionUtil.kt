@@ -68,6 +68,25 @@ class BackgroundLaunchPermissionUtil {
         }
 
         /**
+         * 启动Activity，并获取"结果"，不同与常规，这个结果可以在回调中直接获取。
+         * @param fragment 当前上下文。
+         * @param activity 当前上下文。
+         * @param intent 用于启动Activity的intent。
+         * @param activityResultListener ActivityResult.
+         */
+        fun startActivityForResult(
+            activity: FragmentActivity? = null,
+            fragment: Fragment? = null,
+            intent: Intent,
+            activityResultListener: ActivityResultListener
+        ) {
+            getInvisibleFragment(activity, fragment).startIntentForResult(
+                intent,
+                activityResultListener
+            )
+        }
+
+        /**
          * 常规设备判断条件：API29以下不需权限。API29及以上需要SYSTEM_ALERT_WINDOW权限。
          */
         private fun isCommonDevicePermissionGranted(context: Context) =
@@ -272,6 +291,8 @@ class InvisibleFragment : Fragment() {
     private lateinit var permissionGrantResultListener: PermissionResultListener
     private lateinit var permissionCheckJob: Job
 
+    private lateinit var activityResultListener: ActivityResultListener
+
     /**
      * 启动Activity。
      * @param intent 相应意图。
@@ -317,6 +338,19 @@ class InvisibleFragment : Fragment() {
     }
 
     /**
+     * 通过intent启动Activity。
+     * @param intent 用于启动Activity的intent。
+     * @param activityResultListener ActivityResult.
+     */
+    fun startIntentForResult(
+        intent: Intent,
+        activityResultListener: ActivityResultListener
+    ) {
+        this.activityResultListener = activityResultListener
+        startActivityForResult(intent, REQUEST_CODE_FOR_START_INTENT)
+    }
+
+    /**
      * 处理授权结果。
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -332,15 +366,25 @@ class InvisibleFragment : Fragment() {
                     )
                 }
             }
+            REQUEST_CODE_FOR_START_INTENT -> {
+                if (this::activityResultListener.isInitialized) {
+                    activityResultListener.onResult(resultCode, data)
+                }
+            }
         }
     }
 
     companion object {
         const val REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION = 1
+        const val REQUEST_CODE_FOR_START_INTENT = 100
         const val INVISIBLE_FRAGMENT_TAG = "com.background.launch.invisible.fragment"
     }
 }
 
 interface PermissionResultListener {
     fun onPermissionResult(result: Boolean)
+}
+
+interface ActivityResultListener {
+    fun onResult(resultCode: Int, data: Intent?)
 }

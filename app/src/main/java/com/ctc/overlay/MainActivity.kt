@@ -5,26 +5,33 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.ctc.easyoverlay.BackgroundLaunchPermissionUtil
-import com.ctc.easyoverlay.OverlayDirectionActivity
-import com.ctc.easyoverlay.PermissionResultListener
-import com.ctc.easyoverlay.StartInBackgroundActivity
+import com.ctc.easyoverlay.*
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<TextView>(R.id.tv_test).setOnClickListener {
-            BackgroundLaunchPermissionUtil.startOverlayPermissionGrantActivity(
+//            BackgroundLaunchPermissionUtil.startOverlayPermissionGrantActivity(
+//                activity = this,
+//                autoBack = true,
+//                permissionGrantResultListener = object : PermissionResultListener {
+//                    override fun onPermissionResult(result: Boolean) {
+//                        Log.e("cui", "result:$result")
+//                    }
+//                }
+//            )
+//            startActivity(Intent(this, OverlayDirectionActivity::class.java))
+
+            BackgroundLaunchPermissionUtil.startActivityForResult(
                 activity = this,
-                autoBack = true,
-                permissionGrantResultListener = object : PermissionResultListener {
-                    override fun onPermissionResult(result: Boolean) {
-                        Log.e("cui", "result:$result")
-                    }
-                }
+                intent = Intent(this, OverlayDirectionActivity::class.java),
+               activityResultListener = object : ActivityResultListener {
+                   override fun onResult(resultCode: Int, data: Intent?) {
+                     Log.e("cui", "onResult")
+                   }
+               }
             )
-            startActivity(Intent(this, OverlayDirectionActivity::class.java))
         }
 
         findViewById<TextView>(R.id.tv_test).setOnLongClickListener {
