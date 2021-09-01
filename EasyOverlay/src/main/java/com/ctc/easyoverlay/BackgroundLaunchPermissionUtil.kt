@@ -149,7 +149,7 @@ class BackgroundLaunchPermissionUtil {
             return try {
                 val intent = Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:${activity?.packageName ?: fragment!!.context!!.packageName}")
+                    Uri.parse("package:${activity?.packageName ?: fragment!!.requireContext().packageName}")
                 )
                 getInvisibleFragment(activity, fragment).openBackgroundLaunchPermissionActivity(
                     intent,
@@ -179,13 +179,13 @@ class BackgroundLaunchPermissionUtil {
             if (BuildConfig.DEBUG && !(activity != null || fragment != null)) {
                 error("Activity和Fragment不得同时为空")
             }
-            val context = activity ?: fragment!!.context!!
+            val context = activity ?: fragment!!.requireContext()
             return when (isMiPermissionGranted(context)) {
                 0 -> {
                     try {
                         val intent = Intent(
                             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:${activity?.packageName ?: fragment!!.context!!.packageName}")
+                            Uri.parse("package:${activity?.packageName ?: fragment!!.requireContext().packageName}")
                         )
                         getInvisibleFragment(
                             activity,
@@ -320,8 +320,8 @@ class InvisibleFragment : Fragment() {
                         delay(500)
                         val permissionGranted =
                             if (forBackgroundLaunch) BackgroundLaunchPermissionUtil.isPermissionGranted(
-                                context!!
-                            ) else BackgroundLaunchPermissionUtil.hasOverlayPermission(context!!)
+                                requireContext()
+                            ) else BackgroundLaunchPermissionUtil.hasOverlayPermission(requireContext())
                         if (permissionGranted) {
                             val backIntent = Intent(context, requireActivity().javaClass)
                             backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -362,7 +362,7 @@ class InvisibleFragment : Fragment() {
             REQUEST_CODE_FOR_BACKGROUND_LAUNCH_PERMISSION -> {
                 if (this::permissionGrantResultListener.isInitialized) {
                     permissionGrantResultListener.onPermissionResult(
-                        BackgroundLaunchPermissionUtil.isPermissionGranted(context!!)
+                        BackgroundLaunchPermissionUtil.isPermissionGranted(requireContext())
                     )
                 }
             }
@@ -382,7 +382,7 @@ class InvisibleFragment : Fragment() {
 }
 
 interface PermissionResultListener {
-    fun onPermissionResult(result: Boolean)
+    fun onPermissionResult(granted: Boolean)
 }
 
 interface ActivityResultListener {
